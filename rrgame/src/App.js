@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Home from './components/Home/Home';
+import Board from './components/Board/Board';
 import styled from 'styled-components';
 
 const Container = styled.div`
