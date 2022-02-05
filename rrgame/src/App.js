@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import Home from './components/Home/Home';
-import Board from './components/Board/Board';
+import Game from './components/Game/GameComponent';
 import styled from 'styled-components';
 
 const Container = styled.div`
     width: 100vw;
     height: 100vh;
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 `
-function App() {
+
+const App = () => {
   
   return (
     <Container>
-      <Home />
+      <Game />
     </Container>
   );
 }
