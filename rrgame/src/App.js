@@ -1,25 +1,21 @@
-import logo from './assets/logo.svg';
 import React, { useState, useEffect } from 'react'
+import Home from './components/Home/Home';
+import styled from 'styled-components';
 
+const Container = styled.div`
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
 function App() {
-  const callBackendAPI = async () => {
-    const response = await fetch('http://localhost:3001/express_backend');
-    const body = await response.json();
-
-    if (response.status !== 200) {
-      throw Error(body.message) 
-    }
-    return body;
-  };
-
+  
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>
-         "lmfao"
-        </p>
-      </header>
-    </div>
+    <Container>
+      <Home />
+    </Container>
   );
 }
 
