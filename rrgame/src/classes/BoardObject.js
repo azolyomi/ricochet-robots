@@ -10,9 +10,36 @@ export default class Board {
         this.tiles = this.generateBaseBoard();
         this.generateWalls();
 
-        this.tiles[4][4].setRobot('yellow');
 
-        this.tiles[4][8].setRobot('red');
+        this.moveCount = 0;
+        this.score = 0;
+        this.currentTarget = this.pickTarget();
+
+        this.tiles[4][4].setRobot('yellow');
+        this.tiles[14][15].setRobot('red');
+        this.tiles[8][4].setRobot('blue');
+        this.tiles[10][11].setRobot('green');
+
+        this.tiles[15][15].setTarget({type: 'moon', color: 'red'});
+    }
+
+    resetMoveCount() {
+        this.moveCount = 0;
+    }
+
+    pickTarget() {
+        return {type: "moon", color: "red"};
+    }
+
+    checkIfHasWon(i, j) {
+        console.log("checking if has won");
+        if (this.tiles[i][j].target?.type === this.currentTarget.type && this.tiles[i][j].target?.color === this.currentTarget.color && this.tiles[i][j].robot === this.currentTarget.color) this.hasWon();
+    }
+
+    hasWon() {
+        console.log("SUCCESS!!!!!!");
+        this.score++;
+        this.currentTarget = this.pickTarget();
     }
 
     generateBaseBoard() {
@@ -35,7 +62,7 @@ export default class Board {
             let seed1 = Math.floor(Math.random() * 8);
             let seed2 = Math.floor(Math.random() * 8 + 8);
             for (let j = 0; j<this.width; j++) {
-                if (j == seed1 || j == seed2) this.tiles[i][j].makeRandomWall();
+                if (j === seed1 || j === seed2) this.tiles[i][j].makeRandomWall();
             }
         }
     }
@@ -61,7 +88,9 @@ export default class Board {
             }
             else break;
         }
+        this.moveCount++;
         this.tiles[i][j].robotOn(robot);
+        this.checkIfHasWon(i, j);
         return this.tiles[i][j];
     }
 

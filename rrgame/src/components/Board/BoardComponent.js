@@ -30,6 +30,12 @@ const Robot = styled.div`
     background-color: ${props => props.color};
     border-radius: 10px;
 `
+const Target = styled.div`
+    width: 25px;
+    height: 25px;
+    background-color: ${props => props.color};
+    border-radius: 0px;
+`
 
 const BoardComponent = ({board}) => {
     const [render, setRender] = useState(false);
@@ -69,9 +75,9 @@ const BoardComponent = ({board}) => {
             <Tile color={tile.color} selected={tile.selected} walls={tile.walls} onClick={
                 () => {
                     handleClick();
-                    rerender();
                 }}>
                 {tile.robot && <Robot color={tile.robot} />}
+                {tile.target && <Target color={tile.target.color} />}
             </Tile>
         )
     }

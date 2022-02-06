@@ -1,4 +1,6 @@
 const POSSIBLE_ROBOTS = ['yellow', 'blue', 'red', 'green', 'silver'];
+const POSSIBLE_TARGET_TYPES = ['moon', 'saturn', 'navigator', 'triangle_star'];
+const POSSIBLE_TARGET_COLORS = ['yellow', 'blue', 'red', 'green'];
 
 export default class Tile {
     constructor 
@@ -6,7 +8,7 @@ export default class Tile {
         walls, 
         pos = {x: null, y: null},
         robot = null,
-        target = null, 
+        target = {type: null, color: null}, 
         color = null,
     ) {
         this.robot = this.parseRobot(robot);
@@ -46,8 +48,16 @@ export default class Tile {
         if (this.parseRobot(robot)) this.robot = robot;
     }
 
+    setTarget(target) {
+        if (this.parseTarget(target)) this.target = target;
+    }
+
     parseRobot(robot) {
         return (POSSIBLE_ROBOTS.includes(robot) ? robot : null);
+    }
+
+    parseTarget(target) {
+        return (POSSIBLE_TARGET_TYPES.includes(target.type) && POSSIBLE_TARGET_COLORS.includes(target.color));
     }
 
     canMove(dir) {
