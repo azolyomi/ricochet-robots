@@ -9,8 +9,10 @@ const Container = styled.div`
     height: 100%;
     position: absolute;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    transform: scale(0.8);
 `
 
 const Game = () => {

@@ -1,6 +1,6 @@
-const POSSIBLE_ROBOTS = ['yellow', 'blue', 'red', 'green', 'silver'];
-const POSSIBLE_TARGET_TYPES = ['moon', 'saturn', 'navigator', 'triangle_star'];
-const POSSIBLE_TARGET_COLORS = ['yellow', 'blue', 'red', 'green'];
+import { POSSIBLE_TARGET_COLORS, POSSIBLE_TARGET_TYPES, POSSIBLE_ROBOTS } from '../constants';
+
+const dirs = ["up", "right", "down", "left"];
 
 export default class Tile {
     constructor 
@@ -17,14 +17,15 @@ export default class Tile {
         this.color = color;
         this.pos = pos;
         this.selected = false;
+        this.centerTile = false;
+    }
+
+    setCenterTile() {
+        this.centerTile = true;
     }
 
     makeRandomWall() {
-        let dirs = ["up", "right", "down", "left"];
-        let count = 0;
-        for (let i = 0; i <dirs.length; ++i) {
-            if (this.walls[dirs[i]]) ++count;
-        }
+        let count = this.wallCount();
         if (count === 0) {
             let rand = Math.floor(Math.random() * 4);
             this.walls[dirs[rand]] = true;
@@ -38,6 +39,14 @@ export default class Tile {
                 this.walls[rand === 0 ? "up" : "down"] = true;
             }
         }
+    }
+
+    wallCount() {
+        let count = 0;
+        for (let i = 0; i <dirs.length; ++i) {
+            if (this.walls[dirs[i]]) ++count;
+        }
+        return count;
     }
 
     setSelected(bool) {
