@@ -10,14 +10,14 @@ const Container = styled.div`
 `
 
 const Tile = styled.div`
-    background-color: ${props => (props.color ?? "gray")};
+    background-color: ${props => props.selected ? "#ADD8E6" : (props.color ?? "gray")};
+    opacity: ${props => props.selected ? 0.7 : 1};
     width: 46px;
     height: 48px;
     border-top: ${props => props.walls.up ? "1px solid red" : "1px solid black"};
     border-bottom: ${props => props.walls.down ? "1px solid red" : "1px solid black"};
     border-left: ${props => props.walls.left ? "1px solid red" : "1px solid black"};
     border-right: ${props => props.walls.right ? "1px solid red" : "1px solid black"};
-    ${props => props.selected ? "border: solid 1px blue;" : ""}
 
     display: flex;
     justify-content: center;
@@ -33,8 +33,7 @@ const Robot = styled.div`
 
 const BoardComponent = ({board}) => {
     const [render, setRender] = useState(false);
-    const fromTile = useRef(false);
-    const toTile = useRef(false);
+    const currentTile = useRef(false);
     const unsetSelected = useRef(() => {});
 
     const rerender = () => {
@@ -44,24 +43,25 @@ const BoardComponent = ({board}) => {
     const TileComponent = ({tile}) => {
         const handleClick = () => {
             if (tile.robot) { // clicked on a robot
-                tile.setSelected(!tile.selected);
+                unsetSelected.current();
+                tile.setSelected(true);
                 unsetSelected.current = () => {tile.setSelected(!tile.selected)}
-                fromTile.current = tile;
+                currentTile.current = tile;
                 return;
             }
 
-            if (fromTile.current) {
-                if (fromTile.current.selected) unsetSelected.current();
-                const dir = board.calcDir(fromTile.current, tile);
+            if (currentTile?.current?.selected) {
+                unsetSelected.current();
+                const dir = board.calcDir(currentTile.current, tile);
                 if (dir) {
-                    toTile.current = board.moveRobot(fromTile.current.pos.x, fromTile.current.pos.y, dir);
-                    fromTile.current = toTile.current;
-                    toTile.current = false;
+                    currentTile.current = board.moveRobot(currentTile.current.pos.x, currentTile.current.pos.y, dir);
+                    unsetSelected.current = () => {currentTile.current.setSelected(false)};
+                    currentTile.current.setSelected(true);
                     rerender();
                 }
             }
             else {
-                fromTile.current = tile;
+                currentTile.current = tile;
             }
         }
 

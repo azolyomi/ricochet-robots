@@ -6,19 +6,38 @@ export default class Board {
     constructor() {
         this.height = 16;
         this.width = 16;
-        let t = [];
-        for (let i=0; i<this.height; i++) {
-            t.push([]);
-            for (let j=0; j<this.width; j++) {
-                let walls = {up: i === 0, right: j === this.width-1, down: i === this.height - 1, left: j === 0}
-                t[i].push(new Tile(walls, {x: i, y: j}, null, null, null))
-            }
-        }
-        this.tiles = t;
+        
+        this.tiles = this.generateBaseBoard();
+        this.generateWalls();
 
         this.tiles[4][4].setRobot('yellow');
 
         this.tiles[4][8].setRobot('red');
+    }
+
+    generateBaseBoard() {
+        let t = [];
+        for (let i=0; i<this.height; i++) {
+            t.push([]);
+            for (let j=0; j<this.width; j++) {
+                let walls;
+                if (Math.floor((i + 1) / 2) === 4 && Math.floor((j+1) / 2) === 4) walls = {up: true, down: true, left: true, right: true}
+                else walls = {up: i === 0, right: j === this.width-1, down: i === this.height - 1, left: j === 0}
+                t[i].push(new Tile(walls, {x: i, y: j}, null, null, null))
+            }
+        }
+        return t;
+    }
+
+    generateWalls() {
+
+        for (let i=0; i<this.height; i++) {
+            let seed1 = Math.floor(Math.random() * 8);
+            let seed2 = Math.floor(Math.random() * 8 + 8);
+            for (let j = 0; j<this.width; j++) {
+                if (j == seed1 || j == seed2) this.tiles[i][j].makeRandomWall();
+            }
+        }
     }
 
 
