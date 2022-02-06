@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import { POSSIBLE_ROBOTS } from '../../constants';
 import styled from 'styled-components'
 
 import TileImage from '../../assets/tile.png';
@@ -247,6 +248,18 @@ const GameControls = ({board, rerender, unsetSelected}) => {
     )
 }
 
+const MVMT_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d", " "];
+const MVMT_KEY_DIR = {
+    ArrowUp: "up",
+    w: 'up',
+    ArrowDown: 'down',
+    s: 'down',
+    ArrowLeft: 'left',
+    a: 'left',
+    ArrowRight: 'right',
+    d: 'right'
+}
+
 const BoardComponent = ({board}) => {
     const [render, setRender] = useState(false);
     const currentTile = useRef(false);
@@ -256,11 +269,59 @@ const BoardComponent = ({board}) => {
         setRender(!render);
     }
 
+    useEffect(() => {
+        document.body.addEventListener('keypress', handleKeyPress)
+        return () => {
+            document.body.removeEventListener('keypress', handleKeyPress);
+        }
+    })
+    const handleKeyPress = (e) => {
+        console.log(e.key);
+        if (!MVMT_KEYS.includes(e.key) || !currentTile.current || !board.currentRobot) return;
+        if (e.key === " ") { // this is a robot change
+            unsetSelected.current();
+
+            let currRobotIndex = POSSIBLE_ROBOTS.indexOf(board.currentRobot);
+
+            let nextIndex = (currRobotIndex + 1) % POSSIBLE_ROBOTS.length;
+            let nextRobot = POSSIBLE_ROBOTS[nextIndex]
+            let nextRobotPos = board.currentRobotPositions[nextRobot];
+
+            board.setCurrentRobot(nextRobot)
+            currentTile.current = board.tiles[nextRobotPos.x][nextRobotPos.y];
+
+            console.log("current robot: ", board.currentRobot);
+            console.log("current robot position: ", board.currentRobotPositions[board.currentRobot]);
+
+            unsetSelected.current = () => {currentTile.current.setSelected(false)};
+            currentTile.current.setSelected(true);
+            rerender();
+            return;
+        }
+
+        let dir = MVMT_KEY_DIR[e.key];
+        unsetSelected.current();
+        currentTile.current = board.moveRobot(currentTile.current.pos.x, currentTile.current.pos.y, dir);
+        if (board.checkIfHasFoundTarget(currentTile.current.pos.x, currentTile.current.pos.y)) {
+            unsetSelected.current();
+            board.hasFoundTarget();
+            rerender()
+        }
+        else {
+            unsetSelected.current = () => {currentTile.current.setSelected(false)};
+            currentTile.current.setSelected(true);
+            rerender();
+        }
+
+    }
+
     const TileComponent = ({tile}) => {
         const handleClick = () => {
             if (tile.robot) { // clicked on a robot
                 unsetSelected.current();
                 tile.setSelected(true);
+                board.setCurrentRobot(tile.robot);
+                // board.currentRobotPositions[tile.robot] = tile.pos;
                 unsetSelected.current = () => {tile.setSelected(!tile.selected)}
                 currentTile.current = tile;
                 rerender();
@@ -272,6 +333,8 @@ const BoardComponent = ({board}) => {
                 const dir = board.calcDir(currentTile.current, tile);
                 if (dir) {
                     currentTile.current = board.moveRobot(currentTile.current.pos.x, currentTile.current.pos.y, dir);
+                    // board.setCurrentRobot(currentTile.current.robot);
+                    // board.currentRobotPositions[tile.robot] = tile.pos;
                     if (board.checkIfHasFoundTarget(currentTile.current.pos.x, currentTile.current.pos.y)) {
                         board.hasFoundTarget();
                         unsetSelected.current();
@@ -284,9 +347,9 @@ const BoardComponent = ({board}) => {
                     }
                 }
             }
-            else {
-                currentTile.current = tile;
-            }
+            // else {
+            //     currentTile.current = tile;
+            // }
         }
 
         if (tile.centerTile) 

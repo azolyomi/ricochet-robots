@@ -17,7 +17,17 @@ export default class Board {
         this.currentTarget = this.generateTarget();
 
         this.defaultRobotPositions = {yellow: {x: 0, y: 0}, blue: {x: 0, y: 0}, green: {x: 0, y: 0}, red: {x: 0, y: 0}}
+        this.currentRobotPositions = {yellow: {x: 0, y: 0}, blue: {x: 0, y: 0}, green: {x: 0, y: 0}, red: {x: 0, y: 0}}
+        this.currentRobot = null;
         this.initializeRobotStartPositions();
+    }
+
+    parseRobot(robot) {
+        return (POSSIBLE_ROBOTS.includes(robot) ? robot : null);
+    }
+
+    setCurrentRobot(robot) {
+        if (this.parseRobot(robot)) this.currentRobot = robot;
     }
 
     pickTarget() {
@@ -37,11 +47,11 @@ export default class Board {
             let pos = this.defaultRobotPositions[color];
             console.log(pos);
             this.tiles[pos.x][pos.y].setRobot(color);
+            this.currentRobotPositions[color] = { x: this.defaultRobotPositions[color].x, y: this.defaultRobotPositions[color].y }
         }
     }
 
     initializeRobotStartPositions() {
-    
         for (let color of POSSIBLE_ROBOTS) {
             let i = Math.floor(Math.random() * 16), j = Math.floor(Math.random() * 16);
             while (this.tiles[i][j].target) {
@@ -51,6 +61,7 @@ export default class Board {
             this.tiles[i][j].setRobot(color);
             console.log("COLOR", color);
             this.defaultRobotPositions[color] = {x: i, y: j};
+            this.currentRobotPositions[color] = {x: i, y: j};
         }
         
     }
@@ -142,6 +153,8 @@ export default class Board {
         if (!(this.tiles[xpos][ypos].robot)) return false;
         if (!(DIRECTIONS.includes(direction))) return false;
 
+        let color = this.tiles[xpos][ypos].robot;
+
         console.log("trying to move...");
 
         let i=xpos, j=ypos, inext = xpos, jnext = ypos;
@@ -159,6 +172,8 @@ export default class Board {
             else break;
         }
         this.tiles[i][j].robotOn(robot);
+        this.currentRobotPositions[color] = {x: i, y: j};
+        console.log(this.currentRobotPositions[color]);
         if (i !== xpos || j !== ypos) {
             this.moveCount++;
             this.checkIfHasFoundTarget(i, j);
