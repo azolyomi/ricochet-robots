@@ -2,12 +2,21 @@ import React, { useState, useRef } from 'react'
 import styled from 'styled-components'
 
 import TileImage from '../../assets/tile.png';
-import CenterImage from '../../assets/center.png';
+
+import CenterTL from '../../assets/center_top_left.png';
+import CenterTR from '../../assets/center_top_right.png';
+import CenterBL from '../../assets/center_bottom_left.png';
+import CenterBR from '../../assets/center_bottom_right.png';
+
+import RedRobot from '../../assets/red_robot.png';
+import BlueRobot from '../../assets/blue_robot.png';
+import GreenRobot from '../../assets/green_robot.png';
+import YellowRobot from '../../assets/yellow_robot.png';
+
 import UpWall from '../../assets/up.png';
 import DownWall from '../../assets/down.png';
 import RightWall from '../../assets/right.png';
 import LeftWall from '../../assets/left.png';
-
 
 import blue_navigator from '../../assets/blue_navigator.png';
 import red_navigator from '../../assets/red_navigator.png';
@@ -23,6 +32,13 @@ import blue_triangle_star from '../../assets/blue_triangle_star.png';
 import red_triangle_star from '../../assets/red_triangle_star.png';
 import green_triangle_star from '../../assets/green_triangle_star.png';
 import yellow_triangle_star from '../../assets/yellow_triangle_star.png';
+
+const RobotAsset = {
+    yellow: YellowRobot,
+    blue: BlueRobot,
+    green: GreenRobot,
+    red: RedRobot
+}
 
 const TargetAsset = {
     navigator: {
@@ -44,6 +60,15 @@ const TargetAsset = {
         yellow: yellow_triangle_star
     }
 }
+
+const FlexBox = styled.div`
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+`
 
 const Container = styled.div`
     width: 800px;
@@ -67,18 +92,18 @@ const TileBackgroundImage = styled.img`
     position: absolute;
 `
 const TileSelection = styled.div`
-    background-color: blue;
-    opacity: 0.2;
+    background-color: ${props => props.color ?? "blue"};
+    opacity: 0.25;
     width: 50px;
     height: 50px;
     position: absolute;
     z-index: 0;
 `
-const TileBackground = ({src, selected}) => {
+const TileBackground = ({src, selected, color}) => {
     return (
         <>
             <TileBackgroundImage src={src} />
-            {selected && <TileSelection />}
+            {selected && <TileSelection color={color}/>}
         </>
     )
 }
@@ -96,29 +121,16 @@ const TileWall = styled.img`
     position: absolute;
 `
 
-const RobotIcon = styled.div`
-    width: 20px;
-    height: 20px;
-    background-color: ${props => props.color};
-    border-radius: 10px;
-    z-index: 11;
-`
-const RobotContainer = styled.div`
+const RobotIcon = styled.img`
     width: 50px;
     height: 50px;
-    background-color: transparent;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
+    z-index: 11;
 `
 
-const Robot = ({color, selected}) => {
+const Robot = ({color}) => {
 
     return (
-        <RobotContainer selected={selected}>
-            <RobotIcon color={color} />
-        </RobotContainer>
+        <RobotIcon src={RobotAsset[color]} />
     )
 
 
@@ -133,6 +145,105 @@ const TileTargetImg = styled.img`
 const TileTarget = ({type, color}) => {
     return (
         <TileTargetImg src={TargetAsset[type][color]} />
+    )
+}
+
+const GameControlsContainer = styled.div`
+    height: 80%;
+    width: 20%;
+    margin: 20px;
+    padding: 20px;
+    padding-top: 0px;
+    border: solid 1px white;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+`
+
+const NextTargetContainer = styled.div`
+    height: auto;
+    padding-top: 20px;
+    padding-bottom: 10px;
+    width: 90%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+`
+
+const ControlsContainer = styled.div`
+    height: 70%;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+`
+
+const Control = styled.div`
+    height: 30px;
+    margin-top: 20px;
+    width: 90%;
+    color: white;
+    font-size: 16px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+`
+
+const ClickableControl = styled(Control)`
+    color: white;
+    cursor: pointer;
+    background-color: #0d0d0d;
+    border: solid 1px #2e2e2e;
+    border-radius: 5px;
+
+    &:hover {
+        background-color: #1e1e1e;
+    }
+`
+
+const CompletedTargetsContainer = styled.div`
+    width: auto;
+    height: 10%;
+    align-self: center;
+`
+
+const TargetImage = styled.img`
+    height: 80px;
+    width: 80px%;
+`
+const CompletedTargetImage = styled.img`
+    height: 60px;
+    width: 60px;
+`
+
+const TargetHeader = styled.h2`
+    color: white;
+    font-size: 32px;
+`
+
+const GameControls = ({board, rerender, unsetSelected}) => {
+    return (
+        <GameControlsContainer>
+            <NextTargetContainer>
+                <TargetHeader>Your Target: </TargetHeader>
+                <TargetImage src={TargetAsset[board.currentTarget.type][board.currentTarget.color]} />
+            </NextTargetContainer>
+            <ControlsContainer>
+                <Control>
+                    <div>Score: {board.score}</div>
+                    <div>Moves: {board.moveCount}</div>
+                </Control>
+                <ClickableControl onClick={() => {board.resetRobotPositions(); unsetSelected(); rerender();}}>Reset Positions</ClickableControl>
+                <ClickableControl onClick={() => {board.pickTarget(); rerender();}}>New Target</ClickableControl>
+            </ControlsContainer>
+            <CompletedTargetsContainer>
+                {board.completedTargets.map(t => <CompletedTargetImage src={TargetAsset[t.type][t.color]} />)}
+            </CompletedTargetsContainer>
+        </GameControlsContainer>
     )
 }
 
@@ -161,9 +272,16 @@ const BoardComponent = ({board}) => {
                 const dir = board.calcDir(currentTile.current, tile);
                 if (dir) {
                     currentTile.current = board.moveRobot(currentTile.current.pos.x, currentTile.current.pos.y, dir);
-                    unsetSelected.current = () => {currentTile.current.setSelected(false)};
-                    currentTile.current.setSelected(true);
-                    rerender();
+                    if (board.checkIfHasFoundTarget(currentTile.current.pos.x, currentTile.current.pos.y)) {
+                        board.hasFoundTarget();
+                        unsetSelected.current();
+                        rerender()
+                    }
+                    else {
+                        unsetSelected.current = () => {currentTile.current.setSelected(false)};
+                        currentTile.current.setSelected(true);
+                        rerender();
+                    }
                 }
             }
             else {
@@ -174,7 +292,10 @@ const BoardComponent = ({board}) => {
         if (tile.centerTile) 
             return (
             <TileContainer>
-                <CenterTile src={CenterImage} />
+                {(tile.pos.x === 7 && tile.pos.y === 7) && <CenterTile src={CenterTL} />}
+                {(tile.pos.x === 7 && tile.pos.y === 8) && <CenterTile src={CenterTR} />}
+                {(tile.pos.x === 8 && tile.pos.y === 7) && <CenterTile src={CenterBL} />}
+                {(tile.pos.x === 8 && tile.pos.y === 8) && <CenterTile src={CenterBR} />}
             </TileContainer>
         )
 
@@ -183,7 +304,7 @@ const BoardComponent = ({board}) => {
                 () => {
                     handleClick();
                 }}>
-                <TileBackground selected={tile.selected} src={TileImage} />
+                <TileBackground selected={tile.selected} color={tile.robot} src={TileImage} />
                 {tile.walls.up && <TileWall src={UpWall} />}
                 {tile.walls.down && <TileWall src={DownWall} />}
                 {tile.walls.right && <TileWall src={RightWall} />}
@@ -195,13 +316,16 @@ const BoardComponent = ({board}) => {
         )
     }
     return (
-        <Container>
-            {board.tiles.map((row, i) => 
-                row.map((tile, index) => (
-                    <TileComponent tile={tile} key={index} />
-                ))
-            )}
-        </Container>
+        <FlexBox>
+            <Container>
+                {board.tiles.map((row, i) => 
+                    row.map((tile, index) => (
+                        <TileComponent tile={tile} key={index} />
+                    ))
+                )}
+            </Container>
+            <GameControls board={board} rerender={rerender} unsetSelected={unsetSelected.current}/>
+        </FlexBox>
     )
 }
 

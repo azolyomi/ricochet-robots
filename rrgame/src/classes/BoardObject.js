@@ -1,5 +1,5 @@
 import Tile from './TileObject';
-import { POSSIBLE_TARGETS } from '../constants';
+import { POSSIBLE_TARGETS, POSSIBLE_ROBOTS } from '../constants';
 
 const DIRECTIONS = ["left", "right", "up", "down"];
 
@@ -7,48 +7,79 @@ export default class Board {
     constructor() {
         this.height = 16;
         this.width = 16;
-        this.seenTargets = [];
+        this.completedTargets = [];
         
         this.tiles = this.generateBaseBoard();
         this.generateWallsAndTargets();
 
-
         this.moveCount = 0;
         this.score = 0;
-        this.currentTarget = this.pickTarget();
+        this.currentTarget = this.generateTarget();
 
-        this.tiles[4][4].setRobot('yellow');
-        this.tiles[14][15].setRobot('red');
-        this.tiles[8][4].setRobot('blue');
-        this.tiles[10][11].setRobot('green');
+        this.defaultRobotPositions = {yellow: {x: 0, y: 0}, blue: {x: 0, y: 0}, green: {x: 0, y: 0}, red: {x: 0, y: 0}}
+        this.initializeRobotStartPositions();
+    }
 
-        this.tiles[15][15].setTarget({type: 'navigator', color: 'red'});
+    pickTarget() {
+        this.currentTarget = this.generateTarget();
+    }
+
+    resetRobotPositions() {
+        this.resetMoveCount();
+        for (let i=0; i<this.height; i++) {
+            for (let j=0; j<this.width; j++) {
+                if (this.tiles[i][j].robot) this.tiles[i][j].robotOff();
+            }
+        }
+
+        for (let color of Object.keys(this.defaultRobotPositions)) {
+            console.log("COLOR: ", color);
+            let pos = this.defaultRobotPositions[color];
+            console.log(pos);
+            this.tiles[pos.x][pos.y].setRobot(color);
+        }
+    }
+
+    initializeRobotStartPositions() {
+    
+        for (let color of POSSIBLE_ROBOTS) {
+            let i = Math.floor(Math.random() * 16), j = Math.floor(Math.random() * 16);
+            while (this.tiles[i][j].target) {
+                i = Math.floor(Math.random() * 16); 
+                j = Math.floor(Math.random() * 16);
+            }
+            this.tiles[i][j].setRobot(color);
+            console.log("COLOR", color);
+            this.defaultRobotPositions[color] = {x: i, y: j};
+        }
+        
     }
 
     resetMoveCount() {
         this.moveCount = 0;
     }
 
-    pickTarget() {
+    generateTarget() {
         let index = Math.floor(Math.random() * POSSIBLE_TARGETS.length);
         let target = POSSIBLE_TARGETS[index];
-        if (this.seenTargets.find(e => e.type === target.type && e.color === target.color)) {
-            return this.pickTarget();
+        if (this.completedTargets.find(e => e.type === target.type && e.color === target.color)) {
+            return this.generateTarget();
         }
         console.log(target);
         return target;
     }
 
     checkIfHasFoundTarget(i, j) {
-        if (this.tiles[i][j].target?.type === this.currentTarget.type && this.tiles[i][j].target?.color === this.currentTarget.color && this.tiles[i][j].robot === this.currentTarget.color) this.hasFoundTarget();
+        return (this.tiles[i][j].target?.type === this.currentTarget.type && this.tiles[i][j].target?.color === this.currentTarget.color && this.tiles[i][j].robot === this.currentTarget.color);
     }
 
     hasFoundTarget() {
         console.log("YOU WON!");
         this.score++;
         this.moveCount = 0;
-        this.seenTargets.push(this.currentTarget);
-        this.currentTarget = this.pickTarget();
+        this.completedTargets.push(this.currentTarget);
+        this.pickTarget();
+        this.resetRobotPositions();
     }
 
     generateBaseBoard() {
@@ -127,9 +158,11 @@ export default class Board {
             }
             else break;
         }
-        this.moveCount++;
         this.tiles[i][j].robotOn(robot);
-        this.checkIfHasFoundTarget(i, j);
+        if (i !== xpos || j !== ypos) {
+            this.moveCount++;
+            this.checkIfHasFoundTarget(i, j);
+        }
         return this.tiles[i][j];
     }
 
