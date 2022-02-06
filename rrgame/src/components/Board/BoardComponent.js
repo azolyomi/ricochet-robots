@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react'
 import styled from 'styled-components'
 
+import TileImage from '../../assets/tile.png';
+
 const Container = styled.div`
     width: 800px;
     height: 800px;
@@ -9,19 +11,18 @@ const Container = styled.div`
     flex-wrap: wrap;
 `
 
-const Tile = styled.div`
-    background-color: ${props => props.selected ? "#ADD8E6" : (props.color ?? "gray")};
-    opacity: ${props => props.selected ? 0.7 : 1};
-    width: 46px;
-    height: 48px;
-    border-top: ${props => props.walls.up ? "1px solid red" : "1px solid black"};
-    border-bottom: ${props => props.walls.down ? "1px solid red" : "1px solid black"};
-    border-left: ${props => props.walls.left ? "1px solid red" : "1px solid black"};
-    border-right: ${props => props.walls.right ? "1px solid red" : "1px solid black"};
-
+const TileContainer = styled.div`
+    width: 50px;
+    height: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
+`
+const TileBackground = styled.img`
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    ${props => props.selected ? "border: solid 1px blue inset;" : ""}
 `
 
 const Robot = styled.div`
@@ -29,12 +30,14 @@ const Robot = styled.div`
     height: 20px;
     background-color: ${props => props.color};
     border-radius: 10px;
+    z-index: 10;
 `
 const Target = styled.div`
     width: 25px;
     height: 25px;
     background-color: ${props => props.color};
     border-radius: 0px;
+    z-index: 5;
 `
 
 const BoardComponent = ({board}) => {
@@ -72,13 +75,15 @@ const BoardComponent = ({board}) => {
         }
 
         return (
-            <Tile color={tile.color} selected={tile.selected} walls={tile.walls} onClick={
+            <TileContainer color={tile.color} walls={tile.walls} onClick={
                 () => {
                     handleClick();
                 }}>
+                <TileBackground src={TileImage} selected={tile.selected}/>
                 {tile.robot && <Robot color={tile.robot} />}
                 {tile.target && <Target color={tile.target.color} />}
-            </Tile>
+                
+            </TileContainer>
         )
     }
     return (
