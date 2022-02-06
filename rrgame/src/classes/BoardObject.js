@@ -1,4 +1,5 @@
 import Tile from './TileObject';
+import { POSSIBLE_TARGETS, POSSIBLE_ROBOTS } from '../constants';
 
 const DIRECTIONS = ["left", "right", "up", "down"];
 
@@ -6,40 +7,90 @@ export default class Board {
     constructor() {
         this.height = 16;
         this.width = 16;
+        this.completedTargets = [];
         
         this.tiles = this.generateBaseBoard();
-        this.generateWalls();
-
+        this.generateWallsAndTargets();
 
         this.moveCount = 0;
         this.score = 0;
-        this.currentTarget = this.pickTarget();
+        this.currentTarget = this.generateTarget();
 
-        this.tiles[4][4].setRobot('yellow');
-        this.tiles[14][15].setRobot('red');
-        this.tiles[8][4].setRobot('blue');
-        this.tiles[10][11].setRobot('green');
+        this.defaultRobotPositions = {yellow: {x: 0, y: 0}, blue: {x: 0, y: 0}, green: {x: 0, y: 0}, red: {x: 0, y: 0}}
+        this.currentRobotPositions = {yellow: {x: 0, y: 0}, blue: {x: 0, y: 0}, green: {x: 0, y: 0}, red: {x: 0, y: 0}}
+        this.currentRobot = null;
+        this.initializeRobotStartPositions();
+    }
 
-        this.tiles[15][15].setTarget({type: 'moon', color: 'red'});
+    parseRobot(robot) {
+        return (POSSIBLE_ROBOTS.includes(robot) ? robot : null);
+    }
+
+    setCurrentRobot(robot) {
+        if (this.parseRobot(robot)) this.currentRobot = robot;
+    }
+
+    pickTarget() {
+        this.currentTarget = this.generateTarget();
+    }
+
+    resetRobotPositions() {
+        this.resetMoveCount();
+        for (let i=0; i<this.height; i++) {
+            for (let j=0; j<this.width; j++) {
+                if (this.tiles[i][j].robot) this.tiles[i][j].robotOff();
+            }
+        }
+
+        for (let color of Object.keys(this.defaultRobotPositions)) {
+            console.log("COLOR: ", color);
+            let pos = this.defaultRobotPositions[color];
+            console.log(pos);
+            this.tiles[pos.x][pos.y].setRobot(color);
+            this.currentRobotPositions[color] = { x: this.defaultRobotPositions[color].x, y: this.defaultRobotPositions[color].y }
+        }
+    }
+
+    initializeRobotStartPositions() {
+        for (let color of POSSIBLE_ROBOTS) {
+            let i = Math.floor(Math.random() * 16), j = Math.floor(Math.random() * 16);
+            while (this.tiles[i][j].target) {
+                i = Math.floor(Math.random() * 16); 
+                j = Math.floor(Math.random() * 16);
+            }
+            this.tiles[i][j].setRobot(color);
+            console.log("COLOR", color);
+            this.defaultRobotPositions[color] = {x: i, y: j};
+            this.currentRobotPositions[color] = {x: i, y: j};
+        }
+        
     }
 
     resetMoveCount() {
         this.moveCount = 0;
     }
 
-    pickTarget() {
-        return {type: "moon", color: "red"};
+    generateTarget() {
+        let index = Math.floor(Math.random() * POSSIBLE_TARGETS.length);
+        let target = POSSIBLE_TARGETS[index];
+        if (this.completedTargets.find(e => e.type === target.type && e.color === target.color)) {
+            return this.generateTarget();
+        }
+        console.log(target);
+        return target;
     }
 
-    checkIfHasWon(i, j) {
-        console.log("checking if has won");
-        if (this.tiles[i][j].target?.type === this.currentTarget.type && this.tiles[i][j].target?.color === this.currentTarget.color && this.tiles[i][j].robot === this.currentTarget.color) this.hasWon();
+    checkIfHasFoundTarget(i, j) {
+        return (this.tiles[i][j].target?.type === this.currentTarget.type && this.tiles[i][j].target?.color === this.currentTarget.color && this.tiles[i][j].robot === this.currentTarget.color);
     }
 
-    hasWon() {
-        console.log("SUCCESS!!!!!!");
+    hasFoundTarget() {
+        console.log("YOU WON!");
         this.score++;
-        this.currentTarget = this.pickTarget();
+        this.moveCount = 0;
+        this.completedTargets.push(this.currentTarget);
+        this.pickTarget();
+        this.resetRobotPositions();
     }
 
     generateBaseBoard() {
@@ -47,23 +98,53 @@ export default class Board {
         for (let i=0; i<this.height; i++) {
             t.push([]);
             for (let j=0; j<this.width; j++) {
-                let walls;
-                if (Math.floor((i + 1) / 2) === 4 && Math.floor((j+1) / 2) === 4) walls = {up: true, down: true, left: true, right: true}
-                else walls = {up: i === 0, right: j === this.width-1, down: i === this.height - 1, left: j === 0}
+                let walls = {up: i === 0, right: j === this.width-1, down: i === this.height - 1, left: j === 0}
                 t[i].push(new Tile(walls, {x: i, y: j}, null, null, null))
             }
         }
+        t[7][7].setCenterTile()
+        t[7][7].walls = {up: true, down: false, left: true, right: false};
+
+        t[7][8].setCenterTile()
+        t[7][8].walls = {up: true, down: false, left: false, right: true};
+
+        t[8][7].setCenterTile()
+        t[8][7].walls = {up: false, down: true, left: true, right: false};
+
+        t[8][8].setCenterTile()
+        t[8][8].walls = {up: false, down: true, left: false, right: true};
+
         return t;
     }
 
-    generateWalls() {
+    generateWallsAndTargets() {
+
+        let tempTargets = 
+            POSSIBLE_TARGETS.map(value => ({ value, sort: Math.random() }))
+            .sort((a, b) => a.sort - b.sort)
+            .map(({ value }) => value);
+
+        let possibleTargetLocations = [];
 
         for (let i=0; i<this.height; i++) {
             let seed1 = Math.floor(Math.random() * 8);
             let seed2 = Math.floor(Math.random() * 8 + 8);
             for (let j = 0; j<this.width; j++) {
-                if (j === seed1 || j === seed2) this.tiles[i][j].makeRandomWall();
+                if (j === seed1 || j === seed2) {
+                    this.tiles[i][j].makeRandomWall();
+                    if (this.tiles[i][j].wallCount() >= 2 && !this.tiles[i][j].centerTile && !possibleTargetLocations.find(e => e.i === i && e.j === j)) possibleTargetLocations.push({i, j});
+                }
             }
+        }
+
+        let targetLocations = [];
+        for (let i=0; i<POSSIBLE_TARGETS.length; i++) {
+            let rand = Math.floor(Math.random() * possibleTargetLocations.length);
+            targetLocations.push(possibleTargetLocations[rand])
+        }
+
+        for (let x=0; x<targetLocations.length; x++) {
+            this.tiles[targetLocations[x].i][targetLocations[x].j].setTarget(tempTargets[x]);
         }
     }
 
@@ -71,6 +152,8 @@ export default class Board {
     moveRobot(xpos, ypos, direction) {
         if (!(this.tiles[xpos][ypos].robot)) return false;
         if (!(DIRECTIONS.includes(direction))) return false;
+
+        let color = this.tiles[xpos][ypos].robot;
 
         console.log("trying to move...");
 
@@ -88,9 +171,13 @@ export default class Board {
             }
             else break;
         }
-        this.moveCount++;
         this.tiles[i][j].robotOn(robot);
-        this.checkIfHasWon(i, j);
+        this.currentRobotPositions[color] = {x: i, y: j};
+        console.log(this.currentRobotPositions[color]);
+        if (i !== xpos || j !== ypos) {
+            this.moveCount++;
+            this.checkIfHasFoundTarget(i, j);
+        }
         return this.tiles[i][j];
     }
 

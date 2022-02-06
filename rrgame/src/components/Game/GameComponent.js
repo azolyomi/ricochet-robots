@@ -9,6 +9,7 @@ const Container = styled.div`
     height: 100%;
     position: absolute;
     display: flex;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
 `
@@ -19,6 +20,7 @@ const Game = () => {
     return (
         <Container>
             <BoardComponent board={GameBoard.board}/>
+            {/* <GameControls gameObj={GameBoard} /> */}
         </Container>
     )
 }
