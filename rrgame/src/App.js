@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import Game from './components/Game/GameComponent';
+import Home from './components/Home/Home';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -12,7 +12,7 @@ const App = () => {
   
   return (
     <Container>
-      <Game />
+      <Home />
     </Container>
   );
 }
