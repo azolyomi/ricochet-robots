@@ -1,10 +1,5 @@
 const POSSIBLE_ROBOTS = ['yellow', 'blue', 'red', 'green', 'silver'];
-const ROBOT_WALLS = {
-    up: true,
-    right: true,
-    down: true,
-    left: true
-}
+
 export default class Tile {
     constructor 
     (
@@ -16,10 +11,35 @@ export default class Tile {
     ) {
         this.robot = this.parseRobot(robot);
         this.target = target;
-        this.cached_walls = walls;
-        this.walls = this.robot ? ROBOT_WALLS : walls;
+        this.walls = walls;
         this.color = color;
         this.pos = pos;
+        this.selected = false;
+    }
+
+    makeRandomWall() {
+        let dirs = ["up", "right", "down", "left"];
+        let count = 0;
+        for (let i = 0; i <dirs.length; ++i) {
+            if (this.walls[dirs[i]]) ++count;
+        }
+        if (count === 0) {
+            let rand = Math.floor(Math.random() * 4);
+            this.walls[dirs[rand]] = true;
+            ++count;
+        }
+        if (count === 1) {
+            let rand = Math.floor(Math.random() * 2);
+            if (this.walls.up || this.walls.down) {
+                this.walls[rand === 0 ? "left" : "right"] = true;
+            } else {
+                this.walls[rand === 0 ? "up" : "down"] = true;
+            }
+        }
+    }
+
+    setSelected(bool) {
+        this.selected = bool;
     }
 
     setRobot(robot) {
@@ -46,13 +66,11 @@ export default class Tile {
     }
 
     robotOff() {
-        this.walls = this.cached_walls;
         let robot = this.robot;
         this.robot = null;
         return robot;
     }
     robotOn(robot) {
-        this.walls = ROBOT_WALLS;
         this.robot = robot;
     }
 
