@@ -17,6 +17,8 @@ export default class Board {
         this.tiles = t;
 
         this.tiles[4][4].setRobot('yellow');
+
+        this.tiles[4][8].setRobot('red');
     }
 
 

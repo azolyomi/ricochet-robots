@@ -20,6 +20,11 @@ export default class Tile {
         this.walls = this.robot ? ROBOT_WALLS : walls;
         this.color = color;
         this.pos = pos;
+        this.selected = false;
+    }
+
+    setSelected(bool) {
+        this.selected = bool;
     }
 
     setRobot(robot) {

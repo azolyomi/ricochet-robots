@@ -10,13 +10,14 @@ const Container = styled.div`
 `
 
 const Tile = styled.div`
-    background-color: ${props => props.selected ? "green" : (props.color ?? "gray")};
+    background-color: ${props => (props.color ?? "gray")};
     width: 46px;
     height: 48px;
     border-top: ${props => props.walls.up ? "1px solid red" : "1px solid black"};
     border-bottom: ${props => props.walls.down ? "1px solid red" : "1px solid black"};
     border-left: ${props => props.walls.left ? "1px solid red" : "1px solid black"};
     border-right: ${props => props.walls.right ? "1px solid red" : "1px solid black"};
+    ${props => props.selected ? "border: solid 1px blue;" : ""}
 
     display: flex;
     justify-content: center;
@@ -34,7 +35,7 @@ const BoardComponent = ({board}) => {
     const [render, setRender] = useState(false);
     const fromTile = useRef(false);
     const toTile = useRef(false);
-    // const tileSetter = useRef(() => {});
+    const unsetSelected = useRef(() => {});
 
     const rerender = () => {
         setRender(!render);
@@ -42,8 +43,15 @@ const BoardComponent = ({board}) => {
 
     const TileComponent = ({tile}) => {
         const handleClick = () => {
+            if (tile.robot) { // clicked on a robot
+                tile.setSelected(!tile.selected);
+                unsetSelected.current = () => {tile.setSelected(!tile.selected)}
+                fromTile.current = tile;
+                return;
+            }
+
             if (fromTile.current) {
-                // tile clicked is the direction we want to move in
+                if (fromTile.current.selected) unsetSelected.current();
                 const dir = board.calcDir(fromTile.current, tile);
                 if (dir) {
                     toTile.current = board.moveRobot(fromTile.current.pos.x, fromTile.current.pos.y, dir);
@@ -58,7 +66,7 @@ const BoardComponent = ({board}) => {
         }
 
         return (
-            <Tile color={tile.color} walls={tile.walls} onClick={
+            <Tile color={tile.color} selected={tile.selected} walls={tile.walls} onClick={
                 () => {
                     handleClick();
                     rerender();
