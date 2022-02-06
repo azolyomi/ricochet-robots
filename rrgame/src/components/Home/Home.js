@@ -6,14 +6,21 @@ const Container = styled.div`
     height: 100%;
     background-color: black;
     position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `
-const Text = styled.p`
-    color: white;
+const Button = styled.div`
+    width: 16%;
+    height: 9%;
+    border-radius: 5%;
+    background-color: lightblue;
+    border-color: blue;
 `
 const Home = () => {
     return (
         <Container>
-            <Text>Cheese</Text>
+            <Button onClick={() => {}}>Play Game</Button>
         </Container>
     )
 }
