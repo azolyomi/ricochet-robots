@@ -20,7 +20,6 @@ const Game = () => {
     return (
         <Container>
             <BoardComponent board={GameBoard.board}/>
-            {/* <GameControls gameObj={GameBoard} /> */}
         </Container>
     )
 }

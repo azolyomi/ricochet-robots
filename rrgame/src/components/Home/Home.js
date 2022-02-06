@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import Game from '../Game/GameComponent'
 import styled from 'styled-components'
-
+//7fbfff
 const Container = styled.div`
     width: 100%;
     height: 100%;
-    background-color: #7fbfff;
+    background-color: black;
     position: absolute;
 
     display: flex;
@@ -13,34 +13,59 @@ const Container = styled.div`
     align-items: center;
 `
 const Column = styled.div`
-    width: 100%;
-    height: 100%;
+    width: 50%;
+    height: 50%;
 
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    align-items: start;
+    align-items: center;
 `
-// font-family: "Ageta Chubby Demo" instead of dumb linear gradient
+
 const Title = styled.h1`
-    font-family: serif;
     font-size: 100px;
-    background: -webkit-linear-gradient(#f00, #ff0, #0f0, #00f);
+    padding: 20px;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+    text-align: center;
+    border-radius: 20px;
+    background: -webkit-linear-gradient(#941017, #ff3f3f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+`
+
+const Subtitle = styled.h5`
+    font-size: 30px;
+    text-align: center;
+    border-radius: 20px;
+    background: -webkit-linear-gradient(#941017, #ff3f3f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 `
 const Space = styled.div`
     height: 20%;
 `
 const Button = styled.div`
-    width: 16%;
-    height: 9%;
+    width: 300px;
+    height: 100px;
+    padding: 15px;
     border-radius: 15px;
     border: 4px solid #f00;
     background-color: #f66;
     font-size: 40px;
     font-weight: bold;
-
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: transform 0.2s;
+
+    cursor: pointer;
+
+    &:hover {
+        transform: scale(1.1);
+        transition: transform 0.2s;
+        
+    }
 `
 
 
@@ -54,7 +79,8 @@ const Home = () => {
         <Container>
             <Column>
                 <Title>Ricochet Robots</Title>
-                <Space></Space>
+                <Subtitle>Andras Zolyomi & Reuben Beeler</Subtitle>
+                <Space />
                 <Button onClick={() => {
                     setPlaying(true);
                 }}>Play Game</Button>

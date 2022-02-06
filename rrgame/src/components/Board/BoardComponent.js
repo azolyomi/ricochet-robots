@@ -150,7 +150,7 @@ const TileTarget = ({type, color}) => {
 }
 
 const GameControlsContainer = styled.div`
-    height: 80%;
+    height: auto;
     width: 20%;
     margin: 20px;
     padding: 20px;
@@ -174,12 +174,37 @@ const NextTargetContainer = styled.div`
 `
 
 const ControlsContainer = styled.div`
-    height: 70%;
+    height: auto;
     width: 90%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+`
+const InstructionsContainer = styled.div`
+    margin-top: 20px;
+    padding: 0px;
+    height: auto;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    border: solid 1px red;
+`
+const InstructionsHeader = styled.h5`
+    font-family: system;
+    font-weight: 600;
+    margin: 5px;
+    font-size: 18px;
+    color: #8c8c8c;
+`
+const InstructionsText = styled.h6`
+    font-family: system;
+    font-weight: 400;
+    margin: 5px;
+    font-size: 14px;
+    color: #8c8c8c;
 `
 
 const Control = styled.div`
@@ -241,6 +266,14 @@ const GameControls = ({board, rerender, unsetSelected}) => {
                 <ClickableControl onClick={() => {board.resetRobotPositions(); unsetSelected(); rerender();}}>Reset Positions</ClickableControl>
                 <ClickableControl onClick={() => {board.pickTarget(); rerender();}}>New Target</ClickableControl>
             </ControlsContainer>
+            <InstructionsContainer>
+                <InstructionsHeader>Instructions: </InstructionsHeader>
+                <InstructionsText> Click on a robot to get started. </InstructionsText>
+                <InstructionsText> Each robot moves in the four cardinal directions. </InstructionsText>
+                <InstructionsText> You can move a robot once it's selected by using WASD or clicking a tile in the direction you want to move, but be careful! The floor is slippery, and robots will continue moving until they hit a wall or another robot. </InstructionsText>
+                <InstructionsText> Your goal is to get the correctly colored robot to the 'Target' as depicted above, in the fewest number of moves possible! </InstructionsText>
+                <InstructionsText> This game serves as a training module for the over-the-table board game. </InstructionsText>
+            </InstructionsContainer>
             <CompletedTargetsContainer>
                 {board.completedTargets.map(t => <CompletedTargetImage src={TargetAsset[t.type][t.color]} />)}
             </CompletedTargetsContainer>
@@ -333,6 +366,7 @@ const BoardComponent = ({board}) => {
                 const dir = board.calcDir(currentTile.current, tile);
                 if (dir) {
                     currentTile.current = board.moveRobot(currentTile.current.pos.x, currentTile.current.pos.y, dir);
+                    if (!currentTile.current) console.log("CHEESE!!");
                     // board.setCurrentRobot(currentTile.current.robot);
                     // board.currentRobotPositions[tile.robot] = tile.pos;
                     if (board.checkIfHasFoundTarget(currentTile.current.pos.x, currentTile.current.pos.y)) {
